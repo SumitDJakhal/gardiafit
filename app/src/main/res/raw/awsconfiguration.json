@@ -1,0 +1,16 @@
+{
+  "Version": "1.0",
+  "CredentialsProvider": {
+    "CognitoIdentity": {
+      "Default": {
+        "PoolId": "us-east-1:YOUR_IDENTITY_POOL_ID",
+        "Region": "us-east-1"
+      }
+    }
+  },
+  "DynamoDBObjectMapper": {
+    "Default": {
+      "Region": "us-east-1"
+    }
+  }
+}
