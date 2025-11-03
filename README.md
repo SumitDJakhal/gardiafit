@@ -1,70 +1,75 @@
-Sobti - Your Health Guardian
+# Sobti - Your Health Guardian
 
-Sobti is a smart health and safety companion designed for women and elderly people.
-It helps monitor vital health data such as heart rate and is planned to include safety alerts and medical reminders in future versions.
+Sobti is a smart health and safety companion designed for **women** and **elderly people**.  
+It helps monitor vital health data such as heart rate and aims to support safety and care through wearable technology.
 
-This project includes two parts:
+This project includes two parts:  
+- An **Android mobile app** for user registration and health data setup  
+- A **Wear OS smartwatch app** for real-time monitoring  
 
-An Android mobile app for user registration and health data setup
+**Note:** This project is currently in **development mode**.  
+AWS and backend services are **not yet connected**.
 
-A Wear OS smartwatch app for real-time monitoring
+---
 
-Note: This project is currently in development mode.
+## Purpose
 
-AWS and backend services are not yet connected.
+Sobti is being developed with the goal to:
+- Provide **women’s safety features** using wearable-based alerts and monitoring  
+- Assist **elderly people** who have memory-related or health conditions  
+- Offer continuous **health tracking** and real-time monitoring through smartwatches  
 
-Purpose
+The aim is to combine **health monitoring** with **personal safety** in one connected ecosystem.
 
-Sobti is developed with the goal to:
+---
 
-Support women’s safety through wearable alert and monitoring features
+## Android App (Mobile)
 
-Help elderly people who suffer from memory-related or health conditions
+- Allows users to create and manage their personal health profile  
+- Collects details such as name, email, age, height, weight, and emergency contact  
+- Built with Material Design and gradient UI for a clean experience  
+- Future plan: connect with AWS for secure data storage  
 
-Provide continuous health tracking and real-time monitoring via smartwatch
+**Mobile App Screenshot:**  
+<img src="screenshots/mobile.png" alt="Mobile App Screenshot" width="320"/>
 
-The app aims to combine health monitoring with safety assistance in one connected ecosystem.
+---
 
-Android App (Mobile)
+## Wear OS App
 
-Allows users to create and manage their personal profile
+- Displays real-time heart rate using the Wearable Sensors API  
+- Simple, round interface optimized for smartwatches  
+- Designed for quick health updates at a glance  
+- Planned to include SOS alerts and safety notifications  
 
-Collects basic details such as name, email, age, height, weight, and emergency contact number
+**Wear OS App Screenshot:**  
+<img src="screenshots/wearapp.png" alt="Wear OS App Screenshot" width="260"/>
 
-Built with Material Design and smooth gradient UI
+---
 
-Currently in development; AWS connectivity to be added later
+## Features
 
-Screenshot (Mobile):
-screenshots/mobile_ui.png
+- Real-time heart rate monitoring  
+- Profile setup with emergency contact information  
+- Easy-to-use interface for all age groups  
+- Planned safety and SOS features for women and elderly users  
+- AWS cloud integration to be added in future updates  
 
-Wear OS App
+---
 
-Displays real-time heart rate readings using the Wearable Sensors API
+## Tech Stack
 
-Simple circular interface optimized for smartwatch displays
+| Platform | Technologies Used |
+|-----------|------------------|
+| Mobile | Kotlin, Android Jetpack, Material Components |
+| Wear OS | Kotlin, Google Wearable APIs |
+| Backend | AWS (to be added in future) |
 
-Built to support quick glance-based health checks
+---
 
-Planned to include SOS or alert features in future updates
+## Getting Started
 
-Screenshot (Wear):
-
-
-Features
-
-Real-time heart rate monitoring
-
-Easy-to-use UI for all age groups
-
-Profile setup for emergency contacts
-
-Planned: SOS safety alerts and health reminders
-
-Planned: AWS integration for data storage and remote access
-
-Tech Stack
-Platform	Technologies Used
-Mobile	Kotlin, Android Jetpack, Material Components
-Wear OS	Kotlin, Google Wearable APIs
-Backend	AWS (to be added in future)
+1. Clone the repository  
+   ```bash
+   git clone git@github.com:SumitDJakhal/gardiafit.git
+   cd gardiafit
