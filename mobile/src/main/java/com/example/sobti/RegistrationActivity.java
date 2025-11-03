@@ -10,9 +10,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.sobti.health.aws.AWSConfig;
-import com.eamsobti.health.aws.DynamoDBManager;
-import com.sobti.health.aws.DynamoDBManager.UserData;
+import com.example.sobti.aws.AWSConfig;
+import com.example.sobti.aws.DynamoDBManager;
+import com.example.sobti.aws.DynamoDBManager.UserData;
 
 public class RegistrationActivity extends AppCompatActivity {
 

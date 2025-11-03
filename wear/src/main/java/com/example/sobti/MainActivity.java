@@ -1,4 +1,4 @@
-package com.sobti.health.wear;
+package com.example.sobti;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -15,7 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.*;
 import java.util.Random;
 
-public class WearMainActivity extends FragmentActivity implements SensorEventListener {
+public class MainActivity extends FragmentActivity implements SensorEventListener {
 
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final String DATA_PATH = "/health_data";
@@ -41,7 +41,7 @@ public class WearMainActivity extends FragmentActivity implements SensorEventLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wear_main);
+        setContentView(R.layout.activity_main);
 
         initViews();
         requestPermissions();

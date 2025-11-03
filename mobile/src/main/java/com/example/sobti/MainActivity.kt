@@ -1,8 +1,6 @@
 package com.example.sobti
 
-
 import android.Manifest
-import android.R
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -15,55 +13,40 @@ import com.example.sobti.aws.AWSConfig
 import com.example.sobti.aws.DynamoDBManager
 import com.example.sobti.aws.DynamoDBManager.GetUserCallback
 import com.example.sobti.aws.DynamoDBManager.UpdateCallback
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import com.example.sobti.aws.DynamoDBManager.UserData
+import com.google.android.gms.location.*
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
-import com.example.sobti.health.aws.DynamoDBManager.UserData
-import java.lang.String
-import kotlin.Array
-import kotlin.Exception
-import kotlin.Int
-import kotlin.IntArray
-import kotlin.arrayOf
-import kotlin.collections.plus
-import kotlin.compareTo
-import kotlin.plus
-import kotlin.sequences.plus
-import kotlin.text.format
-import kotlin.text.isEmpty
-import kotlin.text.plus
 
 class MainActivity : AppCompatActivity(), OnDataChangedListener {
-    private var tvHeartRate: TextView? = null
-    private var tvSteps: TextView? = null
-    private var tvLocation: TextView? = null
-    private var tvUserName: TextView? = null
-    private var tvStatus: TextView? = null
-    private var dbManager: DynamoDBManager? = null
-    private var prefs: SharedPreferences? = null
+
+    private lateinit var tvHeartRate: TextView
+    private lateinit var tvSteps: TextView
+    private lateinit var tvLocation: TextView
+    private lateinit var tvUserName: TextView
+    private lateinit var tvStatus: TextView
+
+    private lateinit var dbManager: DynamoDBManager
+    private lateinit var prefs: SharedPreferences
     private var userEmail: String? = null
     private var emergencyNumber: String? = null
 
-    private var fusedLocationClient: FusedLocationProviderClient? = null
-    private var currentLocation: String? = "Loading..."
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var currentLocation: String = "Loading..."
 
     private var currentHeartRate = 0
     private var previousHeartRate = 0
     private var heartRateTrendCount = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         prefs = getSharedPreferences("SobtiPrefs", MODE_PRIVATE)
-        userEmail = prefs!!.getString("user_email", "")
-
+        userEmail = prefs.getString("user_email", "")
 
         // Initialize AWS
         AWSConfig.initialize(this)
@@ -77,21 +60,20 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
     }
 
     private fun initViews() {
-        tvUserName = findViewById<TextView?>(R.id.tvUserName)
-        tvHeartRate = findViewById<TextView?>(R.id.tvHeartRate)
-        tvSteps = findViewById<TextView?>(R.id.tvSteps)
-        tvLocation = findViewById<TextView?>(R.id.tvLocation)
-        tvStatus = findViewById<TextView?>(R.id.tvStatus)
+        tvUserName = findViewById(R.id.tvUserName)
+        tvHeartRate = findViewById(R.id.tvHeartRate)
+        tvSteps = findViewById(R.id.tvSteps)
+        tvLocation = findViewById(R.id.tvLocation)
+        tvStatus = findViewById(R.id.tvStatus)
     }
 
     private fun requestPermissions() {
-        val permissions = arrayOf<String?>(
+        val permissions = arrayOf(
             Manifest.permission.BODY_SENSORS,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SEND_SMS,
             Manifest.permission.ACTIVITY_RECOGNITION
         )
-
         ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE)
     }
 
@@ -101,24 +83,22 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            val locationRequest = LocationRequest.create()
-                .setInterval(30000) // 30 seconds
-                .setFastestInterval(15000)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            // ✅ Modern LocationRequest API
+            val locationRequest = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                30000L // interval
+            )
+                .setMinUpdateIntervalMillis(15000L)
+                .build()
 
-            fusedLocationClient!!.requestLocationUpdates(
+            fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 object : LocationCallback() {
-                    override fun onLocationResult(locationResult: LocationResult?) {
-                        if (locationResult != null) {
-                            val location = locationResult.getLastLocation()
-                            if (location != null) {
-                                currentLocation = String.format(
-                                    "%.6f, %.6f",
-                                    location.getLatitude(), location.getLongitude()
-                                )
-                                updateLocationUI()
-                            }
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        val location = locationResult.lastLocation
+                        location?.let {
+                            currentLocation = String.format("%.6f, %.6f", it.latitude, it.longitude)
+                            updateLocationUI()
                         }
                     }
                 },
@@ -128,115 +108,96 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
     }
 
     private fun loadUserData() {
-        dbManager!!.getUserData(userEmail, object : GetUserCallback {
-            public override fun onSuccess(userData: UserData) {
-                runOnUiThread(Runnable {
-                    tvUserName!!.setText("Welcome, " + userData.name + "!")
+        dbManager.getUserData(userEmail, object : GetUserCallback {
+            override fun onSuccess(userData: UserData) {
+                runOnUiThread {
+                    tvUserName.text = "Welcome, ${userData.name}!"
                     emergencyNumber = userData.emergencyNumber
 
-
-                    // Load last known values
                     if (userData.lastHeartRate > 0) {
-                        tvHeartRate.setText(userData.lastHeartRate + " bpm")
+                        tvHeartRate.text = "${userData.lastHeartRate} bpm"
                     }
                     if (userData.lastSteps > 0) {
-                        tvSteps.setText(String.valueOf(userData.lastSteps))
+                        tvSteps.text = userData.lastSteps.toString()
                     }
-                    if (userData.lastLocation != null) {
-                        currentLocation = userData.lastLocation
+                    userData.lastLocation?.let {
+                        currentLocation = it
                         updateLocationUI()
                     }
-                })
+                }
             }
 
             override fun onError(e: Exception) {
-                runOnUiThread(Runnable {
+                runOnUiThread {
                     Toast.makeText(
                         this@MainActivity,
-                        "Error loading user data: " + e.message,
+                        "Error loading user data: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
-                })
+                }
             }
         })
     }
 
     private fun connectToWearable() {
         Wearable.getDataClient(this).addListener(this)
-        tvStatus!!.setText("Status: Connected to Watch")
+        tvStatus.text = "Status: Connected to Watch"
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         for (event in dataEvents) {
-            if (event.getType() == DataEvent.TYPE_CHANGED) {
-                val item = event.getDataItem()
-                if (item.getUri().getPath() == WEAR_DATA_PATH) {
-                    val dataMap = DataMapItem.fromDataItem(item).getDataMap()
-
+            if (event.type == DataEvent.TYPE_CHANGED) {
+                val item = event.dataItem
+                if (item.uri.path == WEAR_DATA_PATH) {
+                    val dataMap = DataMapItem.fromDataItem(item).dataMap
                     val heartRate = dataMap.getInt("heartRate", 0)
                     val steps = dataMap.getInt("steps", 0)
 
-                    runOnUiThread(Runnable {
+                    runOnUiThread {
                         updateHealthData(heartRate, steps)
-                    })
+                    }
                 }
             }
         }
     }
 
     private fun updateHealthData(heartRate: Int, steps: Int) {
-        // Update UI
-        tvHeartRate!!.setText(heartRate.toString() + " bpm")
-        tvSteps!!.setText(steps.toString())
+        tvHeartRate.text = "$heartRate bpm"
+        tvSteps.text = steps.toString()
 
-
-        // Check heart rate trends
         checkHeartRateTrend(heartRate)
 
-
-        // Update DynamoDB
-        dbManager!!.updateHealthData(
+        dbManager.updateHealthData(
             userEmail, heartRate, steps, currentLocation,
             object : UpdateCallback {
-                override fun onSuccess() {
-                    // Data synced successfully
-                }
-
-                override fun onError(e: Exception?) {
-                    // Handle error silently or log
-                }
+                override fun onSuccess() {}
+                override fun onError(e: Exception?) {}
             })
     }
 
     private fun checkHeartRateTrend(heartRate: Int) {
         currentHeartRate = heartRate
 
-
-        // Check if heart rate is continuously increasing
         if (currentHeartRate > previousHeartRate && currentHeartRate > HIGH_HR_THRESHOLD) {
             heartRateTrendCount++
         } else if (currentHeartRate < previousHeartRate && currentHeartRate < LOW_HR_THRESHOLD) {
             heartRateTrendCount++
         } else {
-            heartRateTrendCount = 0 // Reset counter
+            heartRateTrendCount = 0
         }
 
-
-        // Trigger emergency if trend continues
         if (heartRateTrendCount >= TREND_THRESHOLD) {
             triggerEmergency(heartRate)
-            heartRateTrendCount = 0 // Reset after triggering
+            heartRateTrendCount = 0
         }
 
         previousHeartRate = currentHeartRate
     }
 
     private fun triggerEmergency(heartRate: Int) {
-        if (emergencyNumber == null || emergencyNumber!!.isEmpty()) {
-            return
-        }
+        if (emergencyNumber.isNullOrEmpty()) return
 
-        val message = kotlin.String.format(
+        val message = String.format(
             "SOBTI ALERT!\nAbnormal heart rate detected: %d bpm\nLocation: %s\nImmediate assistance needed!",
             heartRate, currentLocation
         )
@@ -245,14 +206,15 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
             == PackageManager.PERMISSION_GRANTED
         ) {
             try {
-                val smsManager = SmsManager.getDefault()
+                // ✅ Modern API to get SmsManager
+                val smsManager = getSystemService(SmsManager::class.java)
                 smsManager.sendTextMessage(emergencyNumber, null, message, null, null)
 
-                runOnUiThread(Runnable {
-                    tvStatus!!.setText("Status: Emergency SMS Sent!")
-                    tvStatus!!.setTextColor(getResources().getColor(R.color.holo_red_dark))
+                runOnUiThread {
+                    tvStatus.text = "Status: Emergency SMS Sent!"
+                    tvStatus.setTextColor(getColor(android.R.color.holo_red_dark))
                     Toast.makeText(this, "Emergency alert sent!", Toast.LENGTH_LONG).show()
-                })
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -260,7 +222,7 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
     }
 
     private fun updateLocationUI() {
-        tvLocation!!.setText(currentLocation)
+        tvLocation.text = currentLocation
     }
 
     override fun onResume() {
@@ -274,20 +236,14 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<kotlin.String?>,
+        requestCode: Int,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            var allGranted = true
-            for (result in grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false
-                    break
-                }
-            }
-
+            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             if (!allGranted) {
                 Toast.makeText(
                     this,
@@ -302,7 +258,7 @@ class MainActivity : AppCompatActivity(), OnDataChangedListener {
         private const val PERMISSION_REQUEST_CODE = 100
         private const val WEAR_DATA_PATH = "/health_data"
 
-        private const val TREND_THRESHOLD = 3 // 3 consecutive readings
+        private const val TREND_THRESHOLD = 3
         private const val HIGH_HR_THRESHOLD = 120
         private const val LOW_HR_THRESHOLD = 50
     }
