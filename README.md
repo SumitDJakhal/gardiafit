@@ -9,12 +9,14 @@ Watch the complete setup process in this screen recording:
 
 ▶️ [Screenrecording.mp4](./screenshots/Screenrecording.mp4)
 
+
 ---
 
 ## 🖼 DynamoDB Screenshot
 Below is an image of the DynamoDB table used in this setup:
 
-![DynamoDB Table](./screenshots/database.png)
+![DynamoDB Table](./screenshots/databasetable.png)
+
 
 ---
 
