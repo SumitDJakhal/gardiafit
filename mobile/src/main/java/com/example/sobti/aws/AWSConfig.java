@@ -8,8 +8,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 public class AWSConfig {
 
     // TODO: Replace with your AWS credentials
-    private static final String COGNITO_POOL_ID = "us-east-1:YOUR-COGNITO-IDENTITY-POOL-ID";
-    private static final Regions REGION = Regions.US_EAST_1;
+    private static final String COGNITO_POOL_ID = "ap-south-1:90b512e3-2704-4758-a01d-053932a03e37";
+    private static final Regions REGION = Regions.AP_SOUTH_1;
 
     private static CognitoCachingCredentialsProvider credentialsProvider;
     private static AmazonDynamoDBClient ddbClient;

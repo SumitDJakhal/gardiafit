@@ -1,70 +1,105 @@
-Sobti - Your Health Guardian
+# ⚡ AWS Cognito Identity Pool Setup & DynamoDB Integration Guide
 
-Sobti is a smart health and safety companion designed for women and elderly people.
-It helps monitor vital health data such as heart rate and is planned to include safety alerts and medical reminders in future versions.
+This guide explains how to configure **AWS Cognito Identity Pool** for **guest (unauthenticated)** access and connect it with **Amazon DynamoDB** for use in your Android or Java project.
 
-This project includes two parts:
+---
 
-An Android mobile app for user registration and health data setup
+## 🎥 Setup Video
+Watch the complete setup process in this screen recording:
 
-A Wear OS smartwatch app for real-time monitoring
+▶️ [Screenrecording.mp4](./Screenrecording.mp4)
 
-Note: This project is currently in development mode.
+---
 
-AWS and backend services are not yet connected.
+## 🖼 DynamoDB Screenshot
+Below is an image of the DynamoDB table used in this setup:
 
-Purpose
+![DynamoDB Table](./screenshots/database.png)
 
-Sobti is developed with the goal to:
+---
 
-Support women’s safety through wearable alert and monitoring features
+## 🧩 Step 3: Configure Identity Pool Trust
 
-Help elderly people who suffer from memory-related or health conditions
+### 🔹 Section 1: Identity Pool Name
+- Identity pool name: `SobtiIdentityPool`  
+  ✅ Type exactly: **SobtiIdentityPool** (no spaces)
 
-Provide continuous health tracking and real-time monitoring via smartwatch
+---
 
-The app aims to combine health monitoring with safety assistance in one connected ecosystem.
+### 🔹 Section 2: Identity Sources
+You'll see options such as:
 
-Android App (Mobile)
+- Authenticated access  
+- Guest access  
 
-Allows users to create and manage their personal profile
+✅ **Enable Guest Access**  
+Check this box: and Next
 
-Collects basic details such as name, email, age, height, weight, and emergency contact number
+---
 
-Built with Material Design and smooth gradient UI
+### 🔹 Create a New IAM Role
+Create a new IAM role  
+● Create a new role  ← KEEP THIS SELECTED  
+○ Use an existing role  
 
-Currently in development; AWS connectivity to be added later
+**Role name:** `Cognito_SobtiIdentityPoolAuth_Role`
 
-Screenshot (Mobile):
-screenshots/mobile_ui.png
+**Permissions Policies:**  
+Just Keep as it is , don't needs changes in there  
+click **Next** Button.
 
-Wear OS App
+---
 
-Displays real-time heart rate readings using the Wearable Sensors API
+### 🔹 Copy Your Identity Pool ID
+After creation, you'll see:
 
-Simple circular interface optimized for smartwatch displays
+✓ Successfully created identity pool: **SobtiIdentityPool**
 
-Built to support quick glance-based health checks
-
-Planned to include SOS or alert features in future updates
-
-Screenshot (Wear):
+Identity pool ID: us-east-1:12345678-abcd-1234-5678-123456789abc
+↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+COPY THIS ENTIRE STRING!
 
 
-Features
+---
 
-Real-time heart rate monitoring
+## 🔐 Configure IAM Permissions for DynamoDB
 
-Easy-to-use UI for all age groups
+Now we need to give the unauthenticated role access to DynamoDB.
 
-Profile setup for emergency contacts
+Navigate to IAM Console:
 
-Planned: SOS safety alerts and health reminders
+- Open new tab: [https://console.aws.amazon.com/iam/](https://console.aws.amazon.com/iam/)
+- Click **"Roles"** in left sidebar  
+- In search box, type: `Cognito_SobtiIdentityPoolUnauth`  
+- Click on **"Cognito_SobtiIdentityPoolUnauth_Role"**
 
-Planned: AWS integration for data storage and remote access
+---
 
-Tech Stack
-Platform	Technologies Used
-Mobile	Kotlin, Android Jetpack, Material Components
-Wear OS	Kotlin, Google Wearable APIs
-Backend	AWS (to be added in future)
+### 🔹 Attach DynamoDB Policy
+You'll see the role details page:
+
+**Permissions policies (0)**  
+[Add permissions ▼]
+
+Click **"Add permissions"** dropdown  
+Select **"Attach policies"**
+
+In search box, type: `DynamoDB`  
+Find and check: ☑ **AmazonDynamoDBFullAccess**  
+Click **"Attach policies"** button at bottom
+
+---
+
+## 📱 Update Your Android App
+
+**File location:**  
+`mobile/src/main/java/com/example/sobti/aws/AWSConfig.java`
+
+**10.2: Replace the Identity Pool ID**
+
+Find this line (around line 10):
+
+```java
+private static final String COGNITO_POOL_ID = "us-east-1:YOUR-COGNITO-IDENTITY-POOL-ID";
+
+
