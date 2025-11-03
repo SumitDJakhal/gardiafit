@@ -7,7 +7,7 @@ This guide explains how to configure **AWS Cognito Identity Pool** for **guest (
 ## 🎥 Setup Video
 Watch the complete setup process in this screen recording:
 
-▶️ [Screenrecording.mp4](./screenshots/Screenrecording.mp4)
+▶️ [Download Screenrecording.mp4](./screenshots/Screenrecording.mp4)
 
 
 ---
